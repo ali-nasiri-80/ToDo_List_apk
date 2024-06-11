@@ -61,9 +61,24 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         sqLiteDatabase.close();
         return tasks;
     }
-    public void searchInTasks(String query){
-
+    public List<Task> searchInTasks(String query){
+        SQLiteDatabase sqLiteDatabase=getReadableDatabase();
+        Cursor cursor=sqLiteDatabase.rawQuery("SELECT * FROM"+ TABLE_TASKS + " WHERE title  LIKE '%"+query+"%'",null);
+        List<Task> tasks = new ArrayList<>();
+        if(cursor.moveToFirst()){
+            do {
+                Task task=new Task();
+                task.setId(cursor.getLong(0));
+                task.setTitle(cursor.getString(1));
+                task.setCompleted(cursor.getInt(2) == 1);
+                tasks.add(task);
+            }while (cursor.moveToNext());
+        }
+        sqLiteDatabase.close();
+        return tasks;
     }
+
+
     public int deleteTask(Task task){
         SQLiteDatabase sqLiteDatabase=getWritableDatabase();
         int result = sqLiteDatabase.delete(TABLE_TASKS,"id = ?",new String[]{String.valueOf(task.getId())});

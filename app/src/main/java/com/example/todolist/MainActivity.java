@@ -1,8 +1,11 @@
 package com.example.todolist;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +23,30 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialog.Add
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        EditText searchEt=findViewById(R.id.et_main);
+        searchEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length()>0){
+                    List<Task> tasks = sqLiteHelper.searchInTasks(s.toString());
+                    taskAdapter.setTasks(tasks);
+                }else {
+                    List<Task> tasks=sqLiteHelper.getTasks();
+                    taskAdapter.setTasks(tasks);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         RecyclerView recyclerView = findViewById(R.id.rv_main_tasks);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -76,6 +103,11 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialog.Add
         editTaskDialog.setArguments(bundle);
         editTaskDialog.show(getSupportFragmentManager(),null);
 
+    }
+
+    @Override
+    public void onItemCheckedChange(Task task) {
+        sqLiteHelper.updateTask(task);
     }
 
     @Override
